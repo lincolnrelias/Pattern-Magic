@@ -602,7 +602,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5a308ee199a5414186fcbd95193dd63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval: 0.6
+  interval: 0.45
   play: 1
   checkedColor:
     serializedVersion: 2

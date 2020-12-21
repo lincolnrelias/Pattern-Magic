@@ -17,7 +17,7 @@ public class Webcam : MonoBehaviour {
 		threshold - sensibilidade da detecção
 		blendColor - cor de exibição da detecção
 	 */
-	public RawImage Display;
+	public RawImage Display,Display2;
 	[SerializeField]
 	[Range(0,255)]
 	int rMin = 150,rMax=255;
@@ -40,7 +40,7 @@ public class Webcam : MonoBehaviour {
 
 	bool initialized = false;
 	WebCamTexture webcamTexture;
-	Texture2D blendTexture;
+	Texture2D blendTexture, copyTexture;
 	int diffsum = 0;
 	int nullCount = 0;
 	int itCounter = 1;
@@ -51,12 +51,14 @@ public class Webcam : MonoBehaviour {
 	[HideInInspector]
 	public float scale = 1f;
 	// Escala da webcam com relação ao display
+	public Text test_webcamtexture, test_tx, test_ty, test_p;
+
 
 
 	IEnumerator Start() {
         yield return Application.RequestUserAuthorization(UserAuthorization.WebCam | UserAuthorization.Microphone);
         if( Application.HasUserAuthorization(UserAuthorization.WebCam | UserAuthorization.Microphone) ){
-			StartWebcam();
+			StartCoroutine(StartWebcam());
         }
 
     }
@@ -66,20 +68,52 @@ public class Webcam : MonoBehaviour {
 		StartWebcam
 		Inicializa a webcam e texturas
 	 */
-	void StartWebcam(){
-		webcamTexture = new WebCamTexture(426, 240, 30);
-		webcamTexture.requestedFPS = 30;
+	IEnumerator StartWebcam(){
+		print("yes");
+        WebCamDevice[] devices = WebCamTexture.devices;
+        //test_webcamtexture.text = ("cameras " + devices.Length);
+        webcamTexture = new WebCamTexture(devices[0].name,640,480,15);
+        //webcamTexture = new WebCamTexture();
         webcamTexture.Play();
-		blendTexture = new Texture2D( webcamTexture.width, webcamTexture.height );
 
-		if( Display ){
+        Debug.Log(webcamTexture.width+"x"+webcamTexture.height);
+        //test_webcamtexture.text = ("WebcamTexture "+webcamTexture.width + "x" + webcamTexture.height);
+
+        int thresholdTries = 0;
+
+        while (webcamTexture.width <= 16 && thresholdTries < 1000)
+        {
+            while (!webcamTexture.didUpdateThisFrame)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+            webcamTexture.Pause();
+            Color32[] colors = webcamTexture.GetPixels32();
+            webcamTexture.Stop();
+
+            yield return new WaitForEndOfFrame();
+
+            webcamTexture.Play();
+            thresholdTries++;
+            Debug.Log(webcamTexture.width + "x" + webcamTexture.height);
+        }
+
+
+        blendTexture = new Texture2D( webcamTexture.width, webcamTexture.height );
+        copyTexture = new Texture2D(webcamTexture.width, webcamTexture.height);
+
+        if ( Display ){
 			Display.texture = blendTexture;
 			scale = webcamTexture.width / Display.rectTransform.rect.width;
 		}
 
+        if (Display2)
+        {
+            Display2.texture = copyTexture;
+        }
+
 		initialized = true;
 	}
-
 
 	/*
 		UPDATE
@@ -113,8 +147,10 @@ public class Webcam : MonoBehaviour {
 		for(int i=0; i<blendData.Length; i++){
 			checkData[i] = blendData[i];
 		}
-		blendTexture.SetPixels32(blendData);
-        blendTexture.Apply();
+		blendTexture.SetPixels32( blendData );
+		blendTexture.Apply();
+        copyTexture.SetPixels32(lastData);
+        copyTexture.Apply();
     }
 
 
@@ -149,6 +185,7 @@ public class Webcam : MonoBehaviour {
 		retorna true ou false
 	 */
 	public bool checkArea( int x, int y, int width, int height ){
+		print('a');
 		if( !initialized || checkData == null ) return false;
 		
 		int sum = 0;

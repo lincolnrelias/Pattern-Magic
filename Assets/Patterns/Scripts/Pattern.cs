@@ -14,6 +14,9 @@ public class Pattern : MonoBehaviour
     string lastPatternName;
     float lastHitTime,lastErrorTime;
     [SerializeField]
+    PatternSet patternEasy;
+    [SerializeField]
+    PatternSet patternMedium;
     GameObject[] patternPrefabs;
     [SerializeField]
     float minErrorInterval=2f;
@@ -27,6 +30,15 @@ public class Pattern : MonoBehaviour
     int currPatternIndex=0;
     void Start()
     {
+        string difficulty = PlayerPrefs.GetString("Dificuldade");
+        switch(difficulty){
+            case "fácil":
+            patternPrefabs=patternEasy.patterns;
+            break;
+            default:
+            patternPrefabs=patternMedium.patterns;
+            break;
+        }
         lastHitTime = Time.time;
         audioSource = GetComponent<AudioSource>();
         PlayerPrefs.SetInt("Sessao",PlayerPrefs.GetInt("Sessao")+1);
@@ -47,6 +59,7 @@ public class Pattern : MonoBehaviour
         Button currBtn = child.GetComponent<Button>();
         currBtn.canCheck=true;
         if(currChildColor == checkedColor){
+
             currentNode++;
             parAcertos.Add(new KeyTime(currentNode-1,Time.time-lastHitTime));
             lastHitTime = Time.time;
@@ -55,6 +68,7 @@ public class Pattern : MonoBehaviour
     }
     public void errorAdd(int btnIndex){
         if(Time.time-lastErrorTime<minErrorInterval || playing || currentNode<2){return;};
+
         parErros.Add(new KeyTime(btnIndex,Time.time-lastErrorTime));
         lastErrorTime = Time.time;
         Button btnNext = transform.GetChild(currentNode).GetComponent<Button>();
@@ -126,22 +140,16 @@ public class Pattern : MonoBehaviour
         reseting=false;
     }
     void WriteCSV(){
-        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-        Directory.CreateDirectory(path+"/Dados");
-        int nSessao =PlayerPrefs.GetInt("Sessao");
-
-        Directory.CreateDirectory(path+"/Dados/Sessão "+nSessao+"/Acertos");
-        Directory.CreateDirectory(path+"/Dados/Sessão "+nSessao+"/Erros");
         PlayerPrefs.SetInt("AcertoN",PlayerPrefs.GetInt("AcertoN")+1);
-        PlayerPrefs.SetInt("ErroN",PlayerPrefs.GetInt("ErroN")+1);
-        StreamWriter swA = new StreamWriter(path+"/Dados/Sessão "+nSessao+"/Acertos/Acertos "+lastPatternName+" "+PlayerPrefs.GetInt("AcertoN")+".csv");
-        swA.Write(ToCSV(parAcertos));
-        swA.Close();
+        string aName=PlayerPrefs.GetString("PlayerName")!=""?
+        PlayerPrefs.GetString("PlayerName"):"Convidado";
+        string eName=aName;
+        aName+="Acertos"+lastPatternName+PlayerPrefs.GetInt("Sessao")+".csv";
+        WebGLFileSaver.SaveFile(ToCSV(parAcertos),aName);
         if(parErros.Count>0){
         PlayerPrefs.SetInt("ErroN",PlayerPrefs.GetInt("ErroN")+1);
-        StreamWriter swE = new StreamWriter(path+"/Dados/Sessão "+nSessao+"/Erros/Erros"+lastPatternName+" "+PlayerPrefs.GetInt("ErroN")+".csv");
-        swE.Write(ToCSV(parErros));
-        swE.Close();
+        eName+="Erros"+lastPatternName+PlayerPrefs.GetInt("Sessao")+".csv";
+        WebGLFileSaver.SaveFile(ToCSV(parErros),eName);
         }
     }
     public string ToCSV(List<KeyTime> pairList)
