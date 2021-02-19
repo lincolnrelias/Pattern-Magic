@@ -8,10 +8,12 @@ public class CastleHealth : MonoBehaviour
     [SerializeField]float MaxHealth = 100f;
     [SerializeField]Image healthBarImage;
     [SerializeField]float smoothness=5f;
+    [SerializeField]Pattern pattern;
     float currentHealth;
     // Start is called before the first frame update
     void Start()
     {   
+        MaxHealth =PlayerPrefs.HasKey("CastleHealth")?PlayerPrefs.GetFloat("CastleHealth"):100f;
         currentHealth = MaxHealth;
         healthBarImage.fillAmount = 1;
         

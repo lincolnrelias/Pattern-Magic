@@ -1705,6 +1705,7 @@ MonoBehaviour:
   MaxHealth: 500
   healthBarImage: {fileID: 51271255}
   smoothness: 5
+  pattern: {fileID: 6357346299747406338}
 --- !u!4 &347258345 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8036612088763321096, guid: 5f1acbb93d745d145b77295bbd0569b0,

@@ -69,14 +69,12 @@ public class Webcam : MonoBehaviour {
 		Inicializa a webcam e texturas
 	 */
 	IEnumerator StartWebcam(){
-		print("yes");
         WebCamDevice[] devices = WebCamTexture.devices;
         //test_webcamtexture.text = ("cameras " + devices.Length);
         webcamTexture = new WebCamTexture(devices[0].name,640,480,15);
         //webcamTexture = new WebCamTexture();
         webcamTexture.Play();
 
-        Debug.Log(webcamTexture.width+"x"+webcamTexture.height);
         //test_webcamtexture.text = ("WebcamTexture "+webcamTexture.width + "x" + webcamTexture.height);
 
         int thresholdTries = 0;
@@ -185,7 +183,6 @@ public class Webcam : MonoBehaviour {
 		retorna true ou false
 	 */
 	public bool checkArea( int x, int y, int width, int height ){
-		print('a');
 		if( !initialized || checkData == null ) return false;
 		
 		int sum = 0;

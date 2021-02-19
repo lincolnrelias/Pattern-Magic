@@ -60,7 +60,8 @@ public class Button : MonoBehaviour{
                audioSource.PlayOneShot(pointSound); 
                 }
             }else if(img.color==uncheckedColor){
-                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex());
+                int modoPun = PlayerPrefs.HasKey("ModoPunicao")?PlayerPrefs.GetInt("ModoPunicao"):2;
+                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex(),modoPun);
             }
         }
     }
