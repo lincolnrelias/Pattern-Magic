@@ -66,6 +66,20 @@ public class GeradorRelatório : MonoBehaviour
                 return "109";
             case "Circulo 10 pontos":
                 return "110";
+            case "penta 5 pontos":
+                return "201";
+            case "Triangulo 6 pontos":
+                return "202";
+            case "raio 7 pontos":
+                return "203";
+            case "octa 8 pontos":
+                return "204";
+            case "estrela 8 pontos":
+                return "205";
+            case "cubo 8 pontos":
+                return "206";
+            case "S 9 pontos":
+                return "207";
             default:
                 return"";
         }
@@ -89,6 +103,13 @@ public class GeradorRelatório : MonoBehaviour
 "108;Octágono 8 pontos\n"+
 "109;Nonágono 9 pontos\n"+
 "110;Círculo 10 pontos\n"+
+"201;penta 5 pontos\n"+
+"202;Triangulo 6 pontos\n"+
+"203;raio 7 pontos\n"+
+"204;octa 8 pontos\n"+
+"205;estrela 8 pontos\n"+
+"206;cubo 8 pontos\n"+
+"207;S 9 pontos\n"+
 "* Atualizarei essa tabela ao adicionar padrões novos*;\n"+
 "EvA ->  Erro(0) ou acerto(1);\n"+
 "N/C ->  nodo que foi tocado(em relação a ordem em que devem ser tocados);\n"+

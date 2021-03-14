@@ -9,11 +9,13 @@ public class CastleHealth : MonoBehaviour
     [SerializeField]Image healthBarImage;
     [SerializeField]float smoothness=5f;
     [SerializeField]Pattern pattern;
+    [SerializeField]GameObject gameOverScreen;
     float currentHealth;
     // Start is called before the first frame update
     void Start()
     {   
-        MaxHealth =PlayerPrefs.HasKey("CastleHealth")?PlayerPrefs.GetFloat("CastleHealth"):100f;
+        MaxHealth =PlayerPrefs.HasKey("CastleHealth")?PlayerPrefs.GetFloat("CastleHealth"):300f;
+        PlayerPrefs.SetFloat("CastleHealth",MaxHealth);
         currentHealth = MaxHealth;
         healthBarImage.fillAmount = 1;
         
@@ -24,7 +26,7 @@ public class CastleHealth : MonoBehaviour
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.A)){
-            TakeDamage(10f);
+            TakeDamage(5f);
         }
         updateHealthBar();
     }
@@ -42,6 +44,9 @@ public class CastleHealth : MonoBehaviour
     }
 
     void GameOverSequence(){
-        print("Game Over");
+        gameOverScreen.SetActive(true);
+        if(PlayerPrefs.GetString("GerarRelatório")=="sim"){
+        FindObjectOfType<Pattern>().GerarRelatório();
+        }
     }
 }

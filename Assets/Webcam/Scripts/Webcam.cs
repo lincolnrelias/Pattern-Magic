@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class Webcam : MonoBehaviour {
 
@@ -37,7 +38,7 @@ public class Webcam : MonoBehaviour {
 
 	public Color32 blendColor = new Color32(255,217, 20, 20);
 	Vector3 rect;
-
+	bool countForCheck=true;
 	bool initialized = false;
 	WebCamTexture webcamTexture;
 	Texture2D blendTexture, copyTexture;
@@ -47,6 +48,13 @@ public class Webcam : MonoBehaviour {
 	Color32[] lastData = null;
 	Color32[] blendData = null;
 	Color32[] checkData = null;
+	[SerializeField]
+	TMP_Text resumeCounter;
+	[SerializeField]
+	GameObject counterObj;
+	Pattern pattern;
+	int resumeTime=3;
+	
 
 	[HideInInspector]
 	public float scale = 1f;
@@ -60,10 +68,41 @@ public class Webcam : MonoBehaviour {
         if( Application.HasUserAuthorization(UserAuthorization.WebCam | UserAuthorization.Microphone) ){
 			StartCoroutine(StartWebcam());
         }
+		pattern=FindObjectOfType<Pattern>();
 
     }
-
-
+	public void stop(){
+		webcamTexture.Stop();
+		Display.enabled=false;
+	}
+	public void resume(){
+		StartCoroutine(displayAfterDelay());
+	}
+	IEnumerator displayAfterDelay(){
+		Time.timeScale=0;
+		countForCheck=false;
+		counterObj.SetActive(true);
+		int resumetimeOld = resumeTime;
+		resumeCounter.text=resumeTime.ToString();
+		webcamTexture.Play();
+		yield return new WaitForSecondsRealtime(.5f);
+		
+		Display.enabled=true;
+		while(resumeTime>2){
+			resumeTime--;
+			Debug.Log(resumeTime);
+			resumeCounter.text=resumeTime.ToString();
+			yield return new WaitForSecondsRealtime(1f);
+		}
+		resumeCounter.text=1.ToString();
+		yield return new WaitForSecondsRealtime(1f);
+		
+		Time.timeScale=1;
+		countForCheck=true;
+		counterObj.SetActive(false);
+		resumeTime = resumetimeOld;
+		StopCoroutine(displayAfterDelay());
+	}
 	/*
 		StartWebcam
 		Inicializa a webcam e texturas
@@ -111,6 +150,7 @@ public class Webcam : MonoBehaviour {
         }
 
 		initialized = true;
+		
 	}
 
 	/*
@@ -119,6 +159,9 @@ public class Webcam : MonoBehaviour {
 	 */
 	void Update()
     {
+		if(!webcamTexture || !webcamTexture.isPlaying){
+			return;
+		}
         // Aguarda inicialização e inicializa variaveis
 		if (!initialized || webcamTexture.width == 0) return;
         if (lastData == null)
@@ -159,6 +202,9 @@ public class Webcam : MonoBehaviour {
 		Coloca a diferença em blendData
 	*/
     void Difference(){
+		if(!webcamTexture.isPlaying){
+			return;
+		}
 		Color32[] actualData = webcamTexture.GetPixels32();
 		diffsum = 0;	
 		for(int i=0, len=actualData.Length; i<len; i++){
@@ -182,8 +228,11 @@ public class Webcam : MonoBehaviour {
 		Checa se há interação em uma região da webcam
 		retorna true ou false
 	 */
+	bool cantCheckArea(){
+		return pattern.inHitInterval() || pattern.InErrorInterval() || !countForCheck || !initialized || checkData == null; 
+	}
 	public bool checkArea( int x, int y, int width, int height ){
-		if( !initialized || checkData == null ) return false;
+		if(cantCheckArea()) return false;
 		
 		int sum = 0;
 		for(int i=0; i<width*height; i++){

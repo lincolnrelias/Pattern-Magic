@@ -8,20 +8,30 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     GameObject pauseScreen;
     [SerializeField]
+    Webcam webcam1;
     // Update is called once per frame
     void Update()
     {
         if(Input.GetKey(KeyCode.P)){
-            Time.timeScale=0;
-            pauseScreen.SetActive(true);
+            pause();
         }
     }
+    public void pause(){
+        Time.timeScale=0;
+            webcam1.stop();
+            pauseScreen.SetActive(true);
+    }
     public void resume(){
-        Time.timeScale=1;
+        webcam1.resume();
         pauseScreen.SetActive(false);
     }
     public void menu(){
+        if(PlayerPrefs.GetString("GerarRelatório")=="sim"){
+        FindObjectOfType<Pattern>().GerarRelatório();
+        }
+        webcam1.stop();
         SceneManager.UnloadSceneAsync("Main");
         SceneManager.LoadScene("Menu");
+        
     }
 }

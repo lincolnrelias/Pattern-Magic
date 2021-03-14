@@ -6,7 +6,8 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField]Transform hittingPoint;
     [SerializeField]float speed = 5f;
-    [SerializeField]float damage=10f;
+    [SerializeField]float damage=5f;
+    
     [SerializeField]AudioClip[] footstepSounds;
     [SerializeField]AudioClip[] attackSounds;
         [SerializeField]

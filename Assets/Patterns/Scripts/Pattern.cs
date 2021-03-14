@@ -21,13 +21,23 @@ public class Pattern : MonoBehaviour
     [SerializeField]
     float minErrorInterval=2f;
     [SerializeField]
+    float minHitInterval=0.3f;
+    [SerializeField]
     float intervalBetweenPatterns= 1.5f;
+    [SerializeField]
+    GameObject spell;
+    [SerializeField]
+	GameObject completionScreen;
+    [SerializeField]
+    Webcam webcam;
     List<KeyTime> parAcertosEErros=new List<KeyTime>();
     // Start is called before the first frame update
     [SerializeField]
     EnemySpawner enemySpawner;
     int currPatternIndex=0;
     GeradorRelatório geradorRelatório;
+    bool ischecking=false;
+    bool lastWasError=false;
     void Start()
     {
         StartSequence();
@@ -37,11 +47,11 @@ public class Pattern : MonoBehaviour
         geradorRelatório = new GeradorRelatório();
         string difficulty = PlayerPrefs.GetString("Dificuldade");
         switch(difficulty){
-            case "fácil":
-            patternPrefabs=patternEasy.patterns;
+            case "médio":
+            patternPrefabs=patternMedium.patterns;
             break;
             default:
-            patternPrefabs=patternMedium.patterns;
+            patternPrefabs=patternEasy.patterns;
             break;
         }
         lastHitTime = Time.time;
@@ -57,50 +67,65 @@ public class Pattern : MonoBehaviour
             lastHitTime = Time.time;
             return;
         }
-        if(currentNode>=transform.childCount){if(currentNode==transform.childCount){PatternCompletion();}return;}
+        if(currentNode>=transform.childCount && !InErrorInterval()){
+            if(currentNode==transform.childCount){PatternCompletion();}
+            return;
+            }
         Transform child = transform.GetChild(currentNode);
         Color currChildColor=child.GetComponent<Image>().color; 
         Button currBtn = child.GetComponent<Button>();
         currBtn.canCheck=true;
         if(currChildColor == checkedColor){
-
-            currentNode++;
+            currentNode=currentNode=Mathf.Clamp(currentNode+1,1,transform.childCount);
+            lastWasError=false;
             parAcertosEErros.Add(new KeyTime("Acerto",currentNode-1,Time.time-lastHitTime,distanceToEnemy()));
             lastHitTime = Time.time;
-        }
+        }     
         
+
     }
     float distanceToEnemy(){
         Transform enemy = FindObjectOfType<Enemy>().transform;
         Transform point = FindObjectOfType<hittingPoint>().transform;
         return Vector3.Distance(enemy.position,point.position);
     }
+    public bool InErrorInterval(){
+        
+        return Time.time-lastErrorTime<minErrorInterval;
+    }
+    public bool inHitInterval(){
+        return Time.time-lastHitTime<minHitInterval;
+    }
     public void errorAdd(int btnIndex,int returnType){
-        if(Time.time-lastErrorTime<minErrorInterval || playing || currentNode<2){return;};
-
-        parAcertosEErros.Add(new KeyTime("Erro",btnIndex,Time.time-lastErrorTime,distanceToEnemy()));
+        if(InErrorInterval() || playing || currentNode<2){return;};
         lastErrorTime = Time.time;
+        parAcertosEErros.Add(new KeyTime("Erro",btnIndex,Time.time-lastErrorTime,distanceToEnemy()));
+        lastWasError=true;
         Button btnNext;
         Button btnCurr;
         if(returnType==1){
-            currentNode=Mathf.Clamp(currentNode-1,1,transform.childCount);
-            btnNext=transform.GetChild(currentNode).GetComponent<Button>();
-            btnCurr = transform.GetChild(currentNode).GetComponent<Button>();
-            btnNext.canCheck=false;
-            btnCurr.canCheck=true;
-            btnCurr.GetComponent<Animator>().SetTrigger("Error");
-            btnCurr.switchColor();
-        }else{
-            while(currentNode>1){
                 currentNode=Mathf.Clamp(currentNode-1,1,transform.childCount);
-               btnCurr = transform.GetChild(currentNode).GetComponent<Button>();
-               btnCurr.canCheck=false;
+                btnCurr = transform.GetChild(currentNode).GetComponent<Button>();
                 btnCurr.GetComponent<Animator>().SetTrigger("Error");
                 btnCurr.switchColor();
+                btnCurr.canCheck=false;
+                int nodeC = currentNode;
+                while(nodeC>1){
+                nodeC=Mathf.Clamp(nodeC-1,1,transform.childCount);
+               btnCurr = transform.GetChild(nodeC).GetComponent<Button>();
+               btnCurr.canCheck=false;
+               
             }
-            currentNode=1;
-            btnNext=transform.GetChild(currentNode).GetComponent<Button>();
+             btnNext=transform.GetChild(currentNode).GetComponent<Button>();
             btnNext.canCheck=true;
+        }else{
+            int nodeC = transform.childCount-1;
+            while(nodeC>0){
+                btnCurr = transform.GetChild(nodeC).GetComponent<Button>();
+                btnCurr.ejectButton();
+                nodeC--;
+            }
+                PatternCompletion();
         }
         
         if(!audioSource.isPlaying){
@@ -108,27 +133,48 @@ public class Pattern : MonoBehaviour
         }
         
     }
+    public Vector2 GetPatternCounts(){
+        return new Vector2(currPatternIndex-1,patternPrefabs.Length);
+    }
     void PatternCompletion(){
         if(done || reseting){return;};
         done = true;
         lastPatternName = transform.GetChild(0).name.Replace("(Clone)","");
+        if(lastWasError){
+
+        }else{
         Enemy enemy = FindObjectOfType<Enemy>();
         audioSource.PlayOneShot(completionSound);
-        if(enemy)enemy.Die();
+        if(enemy){
+            Vector3 spellPos = enemy.transform.position;
+            spellPos.y+=30f;
+            Instantiate(spell,spellPos,Quaternion.identity);
+        }  
+        }
+        
         reseting=true;
         int childs = transform.childCount;
         for (int i = childs - 1; i >= 0; i--){GameObject.Destroy(transform.GetChild(i).gameObject,1.5f);}
-        WriteCurrPatternInfo();
+        
         if(currPatternIndex<patternPrefabs.Length){
+            WriteCurrPatternInfo();
            StartCoroutine(spawnPatternAfterDelay(1.75f)); 
         }else{
-            GerarRelatório();
+            StartCoroutine(Completion());
             return;
         }
         
         
     }
+    IEnumerator Completion(){
+        GerarRelatório();
+        yield return new WaitForSeconds(2f);
+        Time.timeScale=0;
+        webcam.stop();
+        completionScreen.SetActive(true);
+    }
     public void GerarRelatório(){
+        WriteCurrPatternInfo();
         geradorRelatório.GerarRelatorioFinalCSV();
         geradorRelatório.saveCSV();
     }
@@ -139,9 +185,15 @@ public class Pattern : MonoBehaviour
     }
     void spawnPattern()
     {
-        Transform child = Instantiate(patternPrefabs[currPatternIndex], transform).transform;
+        Transform child;
+        if(lastWasError){
+            child=Instantiate(patternPrefabs[currPatternIndex-1], transform).transform;
+        }else{
+         child = Instantiate(patternPrefabs[currPatternIndex], transform).transform;  
+         currPatternIndex++;
+        }
         setParentTransform(child);
-        currPatternIndex++;
+        
     }
 
      void setParentTransform(Transform child)
@@ -164,7 +216,6 @@ public class Pattern : MonoBehaviour
         exampleIndex = 1;
         currentNode = 1;
         lastErrorTime = Time.time;
-        enemySpawner.SpawnEnemy();
         setParentTransform(transform.GetChild(0));
         if(play){
             StartCoroutine(iterateTroughPoints());
@@ -195,11 +246,13 @@ public class Pattern : MonoBehaviour
             Transform child = transform.GetChild(exampleIndex);
             child.GetComponent<Image>().color=pattern.getColors()[0];
             exampleIndex++;
-            yield return new WaitForSeconds(interval);
+            yield return new WaitForSecondsRealtime(interval);
             audioSource.PlayOneShot(pointSound);
         }
         transform.GetChild(exampleIndex-1).GetComponent<Image>().color=pattern.getColors()[1];
+        if(!lastWasError){
+          enemySpawner.SpawnEnemy();  
+        }
         playing=false;
-        StopCoroutine(iterateTroughPoints());
     }
 }

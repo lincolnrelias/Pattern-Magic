@@ -17,6 +17,7 @@ public class Button : MonoBehaviour{
     Vector3 effectOffset;
     AudioClip pointSound;
     Image img;
+    Rigidbody2D rb;
     int x,y,s;
 
     void Start(){
@@ -24,6 +25,8 @@ public class Button : MonoBehaviour{
         img = GetComponent<Image>();
          rt = GetComponent<RectTransform>();
          audioSource = GetComponent<AudioSource>();
+        rb=gameObject.AddComponent<Rigidbody2D>();
+         rb.bodyType=RigidbodyType2D.Static;
          //Tenta pegar o componente do pai
          patternExample pattern  = transform.parent.GetComponent<patternExample>();
          //Se não der certo pega do primeiro filho do pai
@@ -41,6 +44,13 @@ public class Button : MonoBehaviour{
             img.color = checkedColor;
         }
     }
+    public void ejectButton(){
+        rb.bodyType=RigidbodyType2D.Dynamic;
+        rb.gravityScale=50;
+         rb.mass=10;
+         float xForce=Random.Range(-800f,800f);
+        rb.AddForce(new Vector2(xForce,1000f),ForceMode2D.Impulse);
+    }
     void Update(){
         // int x = (int) (100*webcamInstance.scale),
         //     y = (int) (190*webcamInstance.scale),
@@ -55,6 +65,7 @@ public class Button : MonoBehaviour{
             GetComponent<Animator>().SetTrigger("Check");
             GameObject effectTemp = Instantiate(checkedEffect,transform.position+effectOffset,Quaternion.identity);
             effectTemp.transform.SetParent(transform.parent.parent);
+            effectTemp.transform.SetSiblingIndex(1);
             GameObject.Destroy(effectTemp,2f);
             if(!audioSource.isPlaying){
                audioSource.PlayOneShot(pointSound); 
