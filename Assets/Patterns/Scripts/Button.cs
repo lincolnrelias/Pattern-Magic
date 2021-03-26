@@ -32,6 +32,7 @@ public class Button : MonoBehaviour{
          //Se não der certo pega do primeiro filho do pai
          if(!pattern){pattern = transform.parent.GetChild(0).GetComponent<patternExample>();};
          checkedEffect = pattern.getPointEffect();
+         print(pattern.name);
          pointSound =pattern.getPointSound();
          uncheckedColor = pattern.getColors()[1];
          checkedColor = pattern.getColors()[0];

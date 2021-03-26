@@ -7,16 +7,12 @@ public class Pattern : MonoBehaviour
 {   
     AudioClip completionSound,pointSound,errorSound;
     Color32 checkedColor,uncheckedColor;
-    int currentNode,exampleIndex;
+    int currentNode,exampleIndex=1;
     float interval;
     AudioSource audioSource;
     bool done=false,playing=true,reseting=true;
     string lastPatternName;
     float lastHitTime,lastErrorTime;
-    [SerializeField]
-    PatternSet patternEasy;
-    [SerializeField]
-    PatternSet patternMedium;
     GameObject[] patternPrefabs;
     [SerializeField]
     float minErrorInterval=2f;
@@ -34,26 +30,23 @@ public class Pattern : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField]
     EnemySpawner enemySpawner;
+    [SerializeField]AudioSource musicAs;
     int currPatternIndex=0;
     GeradorRelatório geradorRelatório;
     bool ischecking=false;
     bool lastWasError=false;
+    PatternSpawner patternSpawner;
+    string[] patternList;
     void Start()
     {
         StartSequence();
     }
     public void StartSequence(){
         Time.timeScale=1;
-        geradorRelatório = new GeradorRelatório();
-        string difficulty = PlayerPrefs.GetString("Dificuldade");
-        switch(difficulty){
-            case "médio":
-            patternPrefabs=patternMedium.patterns;
-            break;
-            default:
-            patternPrefabs=patternEasy.patterns;
-            break;
-        }
+        geradorRelatório = GetComponent<GeradorRelatório>();
+        patternSpawner=GetComponent<PatternSpawner>();
+        string setName = "teste";
+        patternList =File.ReadAllLines(Path.Combine(Application.persistentDataPath, "sets/"+setName+".csv"));
         lastHitTime = Time.time;
         audioSource = GetComponent<AudioSource>();
         AudioListener.volume = PlayerPrefs.HasKey("Volume")?PlayerPrefs.GetFloat("Volume"):.7f;
@@ -140,6 +133,7 @@ public class Pattern : MonoBehaviour
         if(done || reseting){return;};
         done = true;
         lastPatternName = transform.GetChild(0).name.Replace("(Clone)","");
+        LineDrawer.clearLines(patternSpawner.getLineDrawer());
         if(lastWasError){
 
         }else{
@@ -155,11 +149,12 @@ public class Pattern : MonoBehaviour
         reseting=true;
         int childs = transform.childCount;
         for (int i = childs - 1; i >= 0; i--){GameObject.Destroy(transform.GetChild(i).gameObject,1.5f);}
-        
-        if(currPatternIndex<patternPrefabs.Length){
+        print("currPatternIndex:"+currPatternIndex);
+         print("patternListLength:"+patternList.Length);
+        if(currPatternIndex<patternList.Length){
             WriteCurrPatternInfo();
            StartCoroutine(spawnPatternAfterDelay(1.75f)); 
-        }else{
+        }else if(!lastWasError){
             StartCoroutine(Completion());
             return;
         }
@@ -171,6 +166,7 @@ public class Pattern : MonoBehaviour
         yield return new WaitForSeconds(2f);
         Time.timeScale=0;
         webcam.stop();
+        musicAs.Stop();
         completionScreen.SetActive(true);
     }
     public void GerarRelatório(){
@@ -186,13 +182,18 @@ public class Pattern : MonoBehaviour
     void spawnPattern()
     {
         Transform child;
-        if(lastWasError){
-            child=Instantiate(patternPrefabs[currPatternIndex-1], transform).transform;
-        }else{
-         child = Instantiate(patternPrefabs[currPatternIndex], transform).transform;  
-         currPatternIndex++;
-        }
-        setParentTransform(child);
+        int spawnIndex = lastWasError?currPatternIndex-1:currPatternIndex;
+        string patternPath = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic/"+patternList[spawnIndex]+".csv");
+            string[] patternInfo = File.ReadAllLines(patternPath);
+            List<int[]> patternInfoList = new List<int[]>();
+            foreach (string item in patternInfo)
+            {
+                int[] btnInfo= {int.Parse(item.Split(',')[0]),int.Parse(item.Split(',')[1])};
+                patternInfoList.Add(btnInfo);
+            }
+            child = patternSpawner.spawnPattern(patternInfoList).transform;
+            setParentTransform(child);
+        if(!lastWasError){currPatternIndex++;}
         
     }
 
@@ -216,7 +217,7 @@ public class Pattern : MonoBehaviour
         exampleIndex = 1;
         currentNode = 1;
         lastErrorTime = Time.time;
-        setParentTransform(transform.GetChild(0));
+        
         if(play){
             StartCoroutine(iterateTroughPoints());
         }else{playing=false;};

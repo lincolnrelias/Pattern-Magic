@@ -10,6 +10,7 @@ public class CastleHealth : MonoBehaviour
     [SerializeField]float smoothness=5f;
     [SerializeField]Pattern pattern;
     [SerializeField]GameObject gameOverScreen;
+    [SerializeField]AudioSource musicAs;
     float currentHealth;
     // Start is called before the first frame update
     void Start()
@@ -18,7 +19,7 @@ public class CastleHealth : MonoBehaviour
         PlayerPrefs.SetFloat("CastleHealth",MaxHealth);
         currentHealth = MaxHealth;
         healthBarImage.fillAmount = 1;
-        
+        musicAs.volume = PlayerPrefs.GetFloat("volMusica");
         
     }
 
@@ -44,6 +45,7 @@ public class CastleHealth : MonoBehaviour
     }
 
     void GameOverSequence(){
+        musicAs.Stop();
         gameOverScreen.SetActive(true);
         if(PlayerPrefs.GetString("GerarRelatório")=="sim"){
         FindObjectOfType<Pattern>().GerarRelatório();

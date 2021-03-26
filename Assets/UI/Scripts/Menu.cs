@@ -13,8 +13,11 @@ public class Menu : MonoBehaviour
     [SerializeField]
     GameObject mainPanel;
     [SerializeField]
+    GameObject editPanel;
+    [SerializeField]
     AudioClip btnClickSound;
     AudioSource audioSource;
+    [SerializeField]AudioSource musicAs;
     IEnumerator Start() {
         audioSource= GetComponent<AudioSource>();
         yield return Application.RequestUserAuthorization(UserAuthorization.WebCam | UserAuthorization.Microphone);
@@ -24,7 +27,12 @@ public class Menu : MonoBehaviour
             PlayerPrefs.SetFloat("CastleHealth",300f);}
         if(!PlayerPrefs.HasKey("Dificuldade")){
             PlayerPrefs.SetString("Dificuldade","fácil");}  
+        if(!PlayerPrefs.HasKey("volMusica")){
+            PlayerPrefs.SetFloat("volMusica",.8f);}      
         
+    }
+    private void Update() {
+        musicAs.volume = PlayerPrefs.GetFloat("volMusica");
     }
     public void playClickSound(){
         audioSource.PlayOneShot(btnClickSound);
@@ -35,6 +43,12 @@ public class Menu : MonoBehaviour
     public void FecharJogo(){
         Application.Quit();
     }
+    public void AbrirEditor(){
+        SceneManager.LoadScene("LevelEditor");
+    }
+    public void patternSet(){
+        editPanel.SetActive(true);
+    }
     public void OpcoesAbrir(){
         mainPanel.SetActive(false);
         optionsPanel.SetActive(true);
@@ -43,6 +57,7 @@ public class Menu : MonoBehaviour
     public void OpcoesFechar(){
         mainPanel.SetActive(true);
         optionsPanel.SetActive(false);
+        editPanel.SetActive(false);
         playClickSound();
     }
 }

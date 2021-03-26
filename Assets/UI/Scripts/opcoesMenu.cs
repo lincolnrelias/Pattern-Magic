@@ -10,6 +10,8 @@ public class opcoesMenu : MonoBehaviour
     [SerializeField]
     Slider volumeSlider;
     [SerializeField]
+    Slider musicVolSlider;
+    [SerializeField]
     Slider castleHealthSlider;
     [SerializeField]
     TMP_Text castleHealthDisplay;
@@ -24,6 +26,7 @@ public class opcoesMenu : MonoBehaviour
         menu = FindObjectOfType<Menu>();
         castleHealthSlider.value=PlayerPrefs.HasKey("CastleHealth")?PlayerPrefs.GetFloat("CastleHealth"):100;
         volumeSlider.value=PlayerPrefs.HasKey("Volume")?PlayerPrefs.GetFloat("Volume"):.6f;
+        musicVolSlider.value=PlayerPrefs.GetFloat("volMusica");
     }
     // Start is called before the first frame update
     public void setDFácil(){
@@ -40,6 +43,9 @@ public class opcoesMenu : MonoBehaviour
     }
     public void setVolume(){
         PlayerPrefs.SetFloat("Volume",volumeSlider.value);
+    }
+    public void setVolMusica(){
+        PlayerPrefs.SetFloat("volMusica",musicVolSlider.value);
     }
     public void setCastleHealth(){
         PlayerPrefs.SetFloat("CastleHealth",castleHealthSlider.value);

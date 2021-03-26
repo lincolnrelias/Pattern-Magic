@@ -25,11 +25,13 @@ public class patternExample : MonoBehaviour
     [SerializeField]
     Vector3 checkedOffset= Vector3.zero;
     int i=1;
-    
+    bool hasInitialized=false;
     // Start is called before the first frame update
-    void Awake()
-    {   
-        transform.parent.GetComponent<Pattern>().newPattern(checkedColor,uncheckedColor,pointSound,errorSound,completionSound,play,interval);
+    private void Update() {
+        if(!hasInitialized && transform.childCount==0){
+            transform.parent.GetComponent<Pattern>().newPattern(checkedColor,uncheckedColor,pointSound,errorSound,completionSound,play,interval);
+            hasInitialized=true;
+        }
     }
     public AudioClip getPointSound(){
         return pointSound;
