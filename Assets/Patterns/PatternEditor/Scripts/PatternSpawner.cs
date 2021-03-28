@@ -33,11 +33,13 @@ public class PatternSpawner : MonoBehaviour
     public GameObject getLineDrawer(){
         return lineDrawer;
     }
-    public GameObject spawnPattern(List<int[]> listOfCoords)
+    public GameObject spawnPattern(List<int[]> listOfCoords,string patternName)
     {
          patternExampleInst = Instantiate(patternExamplePrefab,transform); 
+         patternExampleInst.name = patternName;
         for (int i = 0; i < listOfCoords.Count; i++)
        {
+           
             foreach (Transform point in pointParent.transform)
             {
                 int row= point.GetComponent<SnappPoint>().getRow();   

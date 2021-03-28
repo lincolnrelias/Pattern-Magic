@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Linq;
 
 public class GeradorRelatório : MonoBehaviour
 {
     string relatorioFinal;
     List<string> tables= new List<string>();
     string tablescsv="";
+    [SerializeField]
+    CastleHealth ch;
+    List<string> patternTable=new List<string>();
     public void addContentCSV(List<KeyTime> TableContents,string patternName){
 		
 		
@@ -15,19 +19,21 @@ public class GeradorRelatório : MonoBehaviour
 		// crie um loop e percorra a estrutura onde elas estão e vá preenchendo a tabela.
 		// Segue exemplo onde o vetor bidimensional do tipo String
 		// "ItensDoMeuRelatorio" [qtdItens][6] foi utilizado para armazenar os dados:
+        string convertedName = convertName(patternName);
+        patternTable.Add(convertedName+":"+patternName+"\n");
 		for (int i = 0; i < TableContents.Count; i++)
 		{
             int tipo = TableContents[i].tipo=="Acerto"?1:0;
             tablescsv+=("\n");
             tablescsv+=(PlayerPrefs.GetString("PlayerName")+";");
-            tablescsv+=(convertName(patternName)+";");
+            tablescsv+=(convertedName+";");
             tablescsv+=(System.DateTime.Now.ToString("dd'/'MM'/'yyyy' 'HH':'mm':'ss")+";");
 			tablescsv+=(tipo+";");
 			tablescsv+=(TableContents[i].value+";");
 			tablescsv+=(TableContents[i].time.ToString("F2") +";");
             tablescsv+=(Mathf.Round(TableContents[i].distance)+";");
             tablescsv+=((PlayerPrefs.HasKey("CastleHealth")?Mathf.RoundToInt(PlayerPrefs.GetFloat("CastleHealth")):100).ToString()+";");
-            tablescsv+=(PlayerPrefs.HasKey("ModoPunicao")?PlayerPrefs.GetInt("ModoPunicao"):2);
+            tablescsv+=((ch.getCurrHealth()));
 		}
 		
 		// Feche sua tabela e finalize o relatório
@@ -47,93 +53,68 @@ public class GeradorRelatório : MonoBehaviour
 		relatorioFinal+=lines;
 	}
     string convertName(string pName){
-        switch(pName){
-            case "Reta 2 pontos":
-                return "102";
-            case "Triangulo 3 pontos":
-                return "103";
-            case "Cubo 4 pontos":
-                return "104";
-            case "pentagono 5 pontos":
-                return "105";
-            case "Hexagono 6 pontos":
-                return "106";
-            case "Heptagono 7 pontos":
-                return "107";
-            case "Octagono 8 pontos":
-                return "108";
-            case "Nonagono 9 pontos":
-                return "109";
-            case "Circulo 10 pontos":
-                return "110";
-            case "penta 5 pontos":
-                return "201";
-            case "Triangulo 6 pontos":
-                return "202";
-            case "raio 7 pontos":
-                return "203";
-            case "octa 8 pontos":
-                return "204";
-            case "estrela 8 pontos":
-                return "205";
-            case "cubo 8 pontos":
-                return "206";
-            case "S 9 pontos":
-                return "207";
-            default:
-                return"";
-        }
+        string saveDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+        string readFilePath =Path.Combine(saveDirectory, pName+".csv");
+        string[] lines = File.ReadAllLines(readFilePath);
+        return lines[lines.Length-1];
     }
     public void saveCSV(){
     string saveDirectory = Path.Combine(Application.persistentDataPath, "DadosPatternMagic");
-    string saveFilePath = Path.Combine(saveDirectory, "dados.csv");
+    string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");
+    string PatternTablePath =  Path.Combine(saveDirectory, "tableData.csv");
+    string RawDataPath =  Path.Combine(saveDirectory, "rawData.csv");
     if(!Directory.Exists(saveDirectory))
     {
     Directory.CreateDirectory(saveDirectory);
     }
-    if(!File.Exists(saveFilePath)){
-         string lines=("- - - - - Relatorio de dados coletados - - - - -\n");
-         lines+="T/P -> Tipo de padrão, se refere a qual padrão estava sendo jogado no momento de registro da informação, seu significado segue a seguinte tabela:\n"+
-"102;Reta 2 Pontos\n"+
-"103;Triângulo 3 pontos\n"+
-"104;Cubo 4 pontos\n"+
-"105;Pentágono 5 pontos\n"+
-"106;Hexágono 6 pontos\n"+
-"107;Heptágono 7 pontos\n"+
-"108;Octágono 8 pontos\n"+
-"109;Nonágono 9 pontos\n"+
-"110;Círculo 10 pontos\n"+
-"201;penta 5 pontos\n"+
-"202;Triangulo 6 pontos\n"+
-"203;raio 7 pontos\n"+
-"204;octa 8 pontos\n"+
-"205;estrela 8 pontos\n"+
-"206;cubo 8 pontos\n"+
-"207;S 9 pontos\n"+
-"* Atualizarei essa tabela ao adicionar padrões novos*;\n"+
-"EvA ->  Erro(0) ou acerto(1);\n"+
-"N/C ->  nodo que foi tocado(em relação a ordem em que devem ser tocados);\n"+
-"T/AvE ->  Tempo decorrido em relação ao último registro do mesmo tipo (tempo decorrido desde o último acerto se esse for o registro de um acerto, e vice-versa);\n"+
-"D/I ->  Distância entre o inimigo e o castelo;\n"+
-"HP/C ->  Vida máxima do castelo;\n"+
-"PUN ->  Tipo de punição(1=1 nodo, 2=todos os nodos);\n";
-        lines+=("Paciente;");
-        lines+=("T/P;");
-        lines+=("Data/Hora;");
-		lines+=("E∨A;");
-		lines+=("N/C;");
-        lines+=("T/A∨E;");
-        lines+=("D/I;");
-        lines+=("HP/C;");
-        lines+=("PUN;");
-        File.WriteAllText(saveFilePath, lines);
-    }
-    File.AppendAllText(saveFilePath, relatorioFinal);
-    if(Application.platform == RuntimePlatform.WebGLPlayer){
-       Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+         
+        string collumns=("Paciente;");
+        collumns+=("ID do padrao;");
+        collumns+=("Data/Hora;");
+		collumns+=("Erro/Acerto;");
+		collumns+=("Mandala atingida;");
+        collumns+=("Tempo desde o ultimo erro/acerto;");
+        collumns+=("Distância entre inimigo-castelo;");
+        collumns+=("Vida inicial do castelo;");
+        collumns+=("Vida atual do castelo;");
+    File.AppendAllText(RawDataPath, relatorioFinal);
+    if(File.Exists(PatternTablePath)){
+      string[] tableData = File.ReadAllLines(PatternTablePath);
+    string newTableData="";
+    foreach (string sNew in patternTable.ToArray())
+    {
+        bool isDiff=true;
+        foreach (string sOld in tableData)
+        {
+            print(sNew.Length+":"+sOld.Length);
+
+            if(sNew.Substring(0,sNew.Length-1)==sOld){
+                print("sda");
+               isDiff=false;
+               break;
+            }
+        }
+        if(isDiff){
+            newTableData+=sNew.Substring(0,sNew.Length-1);
+        }
+    }  
+    File.AppendAllText(PatternTablePath,newTableData);
+    }else{
+        File.AppendAllText(PatternTablePath,string.Join("\n",patternTable.ToArray()));
     }
     
-    string result = File.ReadAllText(saveFilePath);
-    WebGLFileSaver.SaveFile(result, "Relatorio.csv"); 
+    string caption=("- - - - - Relatorio de dados coletados - - - - -\n");
+         caption+="T/P -> Tipo de padrão, se refere a qual padrão estava sendo jogado no momento de registro da informação, seu significado segue a seguinte tabela:\n"+
+    File.ReadAllText(PatternTablePath) +
+    "Erro/Acerto ->  Erro(0) ou acerto(1);\n";
+    File.WriteAllText(endFilePath,collumns+File.ReadAllText(RawDataPath)+"\n"+caption);
+    if(Application.platform == RuntimePlatform.WebGLPlayer){
+       Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+       string result = File.ReadAllText(endFilePath);
+        WebGLFileSaver.SaveFile(result, "Relatorio.csv");   
+    }
+
+    
+    
     }
 }

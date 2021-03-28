@@ -28,6 +28,8 @@ public class CornerSnapper : MonoBehaviour
     Sprite lineImage;
     [SerializeField]
     float lineThickness = 10f;
+    [SerializeField]
+    TMP_InputField idField;
     Transform lastClosestNode;
     List<int[]> listOfCoords = new List<int[]>();
     float lastSmallestDistance=1000f;
@@ -133,6 +135,7 @@ public class CornerSnapper : MonoBehaviour
     for(int i=0;i<listOfCoords.Count;i++){
         lines+= listOfCoords[i][0].ToString()+","+listOfCoords[i][1].ToString()+"\n";
     }
+    lines+= idField.text;
     File.WriteAllText(saveFilePath,lines);
     CloseSaveWindow();
     clearAll();

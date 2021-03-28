@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 public class Pattern : MonoBehaviour
 {   
     AudioClip completionSound,pointSound,errorSound;
@@ -45,11 +46,12 @@ public class Pattern : MonoBehaviour
         Time.timeScale=1;
         geradorRelatório = GetComponent<GeradorRelatório>();
         patternSpawner=GetComponent<PatternSpawner>();
-        string setName = "teste";
+        string setName = PlayerPrefs.GetString("Dificuldade")=="custom"?
+        PlayerPrefs.GetString("currentSequence"):PlayerPrefs.GetString("Dificuldade");
         patternList =File.ReadAllLines(Path.Combine(Application.persistentDataPath, "sets/"+setName+".csv"));
         lastHitTime = Time.time;
         audioSource = GetComponent<AudioSource>();
-        AudioListener.volume = PlayerPrefs.HasKey("Volume")?PlayerPrefs.GetFloat("Volume"):.7f;
+        AudioListener.volume = PlayerPrefs.GetFloat("Volume");
         StartCoroutine(spawnPatternAfterDelay(intervalBetweenPatterns));
     }
 
@@ -149,8 +151,6 @@ public class Pattern : MonoBehaviour
         reseting=true;
         int childs = transform.childCount;
         for (int i = childs - 1; i >= 0; i--){GameObject.Destroy(transform.GetChild(i).gameObject,1.5f);}
-        print("currPatternIndex:"+currPatternIndex);
-         print("patternListLength:"+patternList.Length);
         if(currPatternIndex<patternList.Length){
             WriteCurrPatternInfo();
            StartCoroutine(spawnPatternAfterDelay(1.75f)); 
@@ -185,13 +185,14 @@ public class Pattern : MonoBehaviour
         int spawnIndex = lastWasError?currPatternIndex-1:currPatternIndex;
         string patternPath = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic/"+patternList[spawnIndex]+".csv");
             string[] patternInfo = File.ReadAllLines(patternPath);
+            Array.Resize(ref patternInfo,patternInfo.Length-1);
             List<int[]> patternInfoList = new List<int[]>();
             foreach (string item in patternInfo)
             {
                 int[] btnInfo= {int.Parse(item.Split(',')[0]),int.Parse(item.Split(',')[1])};
                 patternInfoList.Add(btnInfo);
             }
-            child = patternSpawner.spawnPattern(patternInfoList).transform;
+            child = patternSpawner.spawnPattern(patternInfoList,patternList[spawnIndex]).transform;
             setParentTransform(child);
         if(!lastWasError){currPatternIndex++;}
         

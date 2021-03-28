@@ -20,7 +20,9 @@ public class opcoesMenu : MonoBehaviour
     [SerializeField]
     GameObject btnMedioChecked;
     [SerializeField]
-    GameObject btnPTodos;
+    GameObject btnCustomChecked;
+    [SerializeField]
+    TMP_Text currentSequenceText;
     Menu menu;
     private void Start() {
         menu = FindObjectOfType<Menu>();
@@ -35,6 +37,10 @@ public class opcoesMenu : MonoBehaviour
     }
     public void setDMédio(){
          PlayerPrefs.SetString("Dificuldade","médio");
+         menu.playClickSound();
+    }
+    public void setCustom(){
+        PlayerPrefs.SetString("Dificuldade","custom");
          menu.playClickSound();
     }
     public void setName(){
@@ -66,16 +72,21 @@ public class opcoesMenu : MonoBehaviour
     }
      private void LateUpdate() {
          castleHealthDisplay.SetText(Mathf.RoundToInt(castleHealthSlider.value).ToString());
-        if(PlayerPrefs.GetInt("ModoPunicao")==2){
-            btnPTodos.SetActive(true);
-        }
+         currentSequenceText.text = "Sequência escolhida:\n"+PlayerPrefs.GetString("currentSequence");
         if(PlayerPrefs.GetString("Dificuldade")=="fácil"){
             btnFacilChecked.SetActive(true);
             btnMedioChecked.SetActive(false);
+            btnCustomChecked.SetActive(false);
         }
         if(PlayerPrefs.GetString("Dificuldade")=="médio"){
             btnFacilChecked.SetActive(false);
             btnMedioChecked.SetActive(true);
+            btnCustomChecked.SetActive(false);
+        }
+        if(PlayerPrefs.GetString("Dificuldade")=="custom"){
+            btnFacilChecked.SetActive(false);
+            btnMedioChecked.SetActive(false);
+            btnCustomChecked.SetActive(true);
         }
      }
 }

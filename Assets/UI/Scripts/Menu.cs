@@ -28,7 +28,16 @@ public class Menu : MonoBehaviour
         if(!PlayerPrefs.HasKey("Dificuldade")){
             PlayerPrefs.SetString("Dificuldade","fácil");}  
         if(!PlayerPrefs.HasKey("volMusica")){
-            PlayerPrefs.SetFloat("volMusica",.8f);}      
+            PlayerPrefs.SetFloat("volMusica",.8f);}  
+            if(!PlayerPrefs.HasKey("currentSequence")){
+                PlayerPrefs.SetString("currentSequence","fácil");
+            }
+            if(!PlayerPrefs.HasKey("Dificuldade")){
+                PlayerPrefs.SetString("Dificuldade","fácil");
+            }    
+            if(!PlayerPrefs.HasKey("Volume")){
+                PlayerPrefs.SetFloat("Volume",.7f);
+            }
         
     }
     private void Update() {
@@ -48,6 +57,7 @@ public class Menu : MonoBehaviour
     }
     public void patternSet(){
         editPanel.SetActive(true);
+        playClickSound();
     }
     public void OpcoesAbrir(){
         mainPanel.SetActive(false);

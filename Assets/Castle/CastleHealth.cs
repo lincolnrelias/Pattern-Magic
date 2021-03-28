@@ -37,7 +37,9 @@ public class CastleHealth : MonoBehaviour
             GameOverSequence();
         }
     }
-
+    public float getCurrHealth(){
+        return currentHealth;
+    }
     void updateHealthBar(){
         healthBarImage.fillAmount = Mathf.Lerp(healthBarImage.fillAmount,
         Mathf.Clamp(currentHealth/MaxHealth,0,1),

@@ -32,7 +32,6 @@ public class Button : MonoBehaviour{
          //Se não der certo pega do primeiro filho do pai
          if(!pattern){pattern = transform.parent.GetChild(0).GetComponent<patternExample>();};
          checkedEffect = pattern.getPointEffect();
-         print(pattern.name);
          pointSound =pattern.getPointSound();
          uncheckedColor = pattern.getColors()[1];
          checkedColor = pattern.getColors()[0];
@@ -73,7 +72,7 @@ public class Button : MonoBehaviour{
                 }
             }else if(img.color==uncheckedColor){
                 int modoPun = PlayerPrefs.HasKey("ModoPunicao")?PlayerPrefs.GetInt("ModoPunicao"):2;
-                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex(),modoPun);
+                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex()+1,modoPun);
             }
         }
     }

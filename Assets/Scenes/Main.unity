@@ -13664,8 +13664,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c54da23e8e45e544a0844eb42268f09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patternEasy: {fileID: 11400000, guid: 7ca673231ca30c941b5a4e5cce97a313, type: 2}
-  patternMedium: {fileID: 11400000, guid: c20ea98544f790d448d6c57006844201, type: 2}
   minErrorInterval: 2
   minHitInterval: 0.3
   intervalBetweenPatterns: 1.5
@@ -13859,6 +13857,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31724145eb1e80c42b77f7839e1936d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ch: {fileID: 347258344}
 --- !u!1001 &6615993551130183428
 PrefabInstance:
   m_ObjectHideFlags: 0
