@@ -20,7 +20,8 @@ public class GeradorRelatório : MonoBehaviour
 		// Segue exemplo onde o vetor bidimensional do tipo String
 		// "ItensDoMeuRelatorio" [qtdItens][6] foi utilizado para armazenar os dados:
         string convertedName = convertName(patternName);
-        patternTable.Add(convertedName+":"+patternName+"\n");
+        if(!patternTable.Contains(convertedName+":"+patternName)){
+            patternTable.Add(convertedName+":"+patternName);}
 		for (int i = 0; i < TableContents.Count; i++)
 		{
             int tipo = TableContents[i].tipo=="Acerto"?1:0;
@@ -32,7 +33,7 @@ public class GeradorRelatório : MonoBehaviour
 			tablescsv+=(TableContents[i].value+";");
 			tablescsv+=(TableContents[i].time.ToString("F2") +";");
             tablescsv+=(Mathf.Round(TableContents[i].distance)+";");
-            tablescsv+=((PlayerPrefs.HasKey("CastleHealth")?Mathf.RoundToInt(PlayerPrefs.GetFloat("CastleHealth")):100).ToString()+";");
+            tablescsv+=(Mathf.RoundToInt(PlayerPrefs.GetInt("CastleHealth")).ToString()+";");
             tablescsv+=((ch.getCurrHealth()));
 		}
 		
@@ -60,6 +61,7 @@ public class GeradorRelatório : MonoBehaviour
     }
     public void saveCSV(){
     string saveDirectory = Path.Combine(Application.persistentDataPath, "DadosPatternMagic");
+    string patternDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
     string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");
     string PatternTablePath =  Path.Combine(saveDirectory, "tableData.csv");
     string RawDataPath =  Path.Combine(saveDirectory, "rawData.csv");
@@ -78,43 +80,36 @@ public class GeradorRelatório : MonoBehaviour
         collumns+=("Vida inicial do castelo;");
         collumns+=("Vida atual do castelo;");
     File.AppendAllText(RawDataPath, relatorioFinal);
-    if(File.Exists(PatternTablePath)){
-      string[] tableData = File.ReadAllLines(PatternTablePath);
     string newTableData="";
-    foreach (string sNew in patternTable.ToArray())
-    {
-        bool isDiff=true;
-        foreach (string sOld in tableData)
+    DirectoryInfo dInfo = new DirectoryInfo(patternDirectory);//Assuming Test is your Folder
+        FileInfo[] fileArray = dInfo.GetFiles(); //Ge
+        foreach (FileInfo item in fileArray)
         {
-            print(sNew.Length+":"+sOld.Length);
-
-            if(sNew.Substring(0,sNew.Length-1)==sOld){
-                print("sda");
-               isDiff=false;
-               break;
-            }
+            string[] file = File.ReadAllLines(Path.Combine(patternDirectory,item.Name));
+            newTableData+=file[file.Length-1]+":"+item.Name.Replace(".csv","")+"\n";
         }
-        if(isDiff){
-            newTableData+=sNew.Substring(0,sNew.Length-1);
-        }
-    }  
-    File.AppendAllText(PatternTablePath,newTableData);
-    }else{
-        File.AppendAllText(PatternTablePath,string.Join("\n",patternTable.ToArray()));
+    File.WriteAllText(PatternTablePath,newTableData);
+    if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
     }
-    
     string caption=("- - - - - Relatorio de dados coletados - - - - -\n");
          caption+="T/P -> Tipo de padrão, se refere a qual padrão estava sendo jogado no momento de registro da informação, seu significado segue a seguinte tabela:\n"+
     File.ReadAllText(PatternTablePath) +
     "Erro/Acerto ->  Erro(0) ou acerto(1);\n";
     File.WriteAllText(endFilePath,collumns+File.ReadAllText(RawDataPath)+"\n"+caption);
+    
     if(Application.platform == RuntimePlatform.WebGLPlayer){
-       Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
-       string result = File.ReadAllText(endFilePath);
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
+    
+    
+    }
+    public static void downloadReport(){
+    if(Application.platform == RuntimePlatform.WebGLPlayer){
+        string saveDirectory = Path.Combine(Application.persistentDataPath, "DadosPatternMagic");
+        string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");  
+        string result = File.ReadAllText(endFilePath);
         WebGLFileSaver.SaveFile(result, "Relatorio.csv");   
     }
-
-    
-    
     }
 }

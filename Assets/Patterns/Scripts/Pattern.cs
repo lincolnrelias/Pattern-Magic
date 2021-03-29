@@ -129,16 +129,14 @@ public class Pattern : MonoBehaviour
         
     }
     public Vector2 GetPatternCounts(){
-        return new Vector2(currPatternIndex-1,patternPrefabs.Length);
+        return new Vector2(currPatternIndex-1,patternList.Length);
     }
     void PatternCompletion(){
         if(done || reseting){return;};
         done = true;
         lastPatternName = transform.GetChild(0).name.Replace("(Clone)","");
         LineDrawer.clearLines(patternSpawner.getLineDrawer());
-        if(lastWasError){
-
-        }else{
+        if(!lastWasError){
         Enemy enemy = FindObjectOfType<Enemy>();
         audioSource.PlayOneShot(completionSound);
         if(enemy){
@@ -151,10 +149,10 @@ public class Pattern : MonoBehaviour
         reseting=true;
         int childs = transform.childCount;
         for (int i = childs - 1; i >= 0; i--){GameObject.Destroy(transform.GetChild(i).gameObject,1.5f);}
-        if(currPatternIndex<patternList.Length){
+        if(currPatternIndex<patternList.Length || lastWasError){
             WriteCurrPatternInfo();
            StartCoroutine(spawnPatternAfterDelay(1.75f)); 
-        }else if(!lastWasError){
+        }else {
             StartCoroutine(Completion());
             return;
         }

@@ -30,6 +30,8 @@ public class CornerSnapper : MonoBehaviour
     float lineThickness = 10f;
     [SerializeField]
     TMP_InputField idField;
+    [SerializeField]
+    TMP_Text saveMessage;
     Transform lastClosestNode;
     List<int[]> listOfCoords = new List<int[]>();
     float lastSmallestDistance=1000f;
@@ -82,7 +84,6 @@ public class CornerSnapper : MonoBehaviour
         }
         
     }
-    
     lastSmallestDistance=1000f;
     currentButton.transform.parent = lastClosestNode;
     currentButton.GetComponent<RectTransform>().anchoredPosition= Vector3.zero;
@@ -98,6 +99,12 @@ public class CornerSnapper : MonoBehaviour
         pointList.Add(snappPoint);
         currentButton = Instantiate(buttonPrefab,mousePos,Quaternion.identity);
     }
+    }
+    IEnumerator showMessage(string message,float duration,Color color){
+        saveMessage.text=message;
+        saveMessage.color = color;
+        yield return new WaitForSeconds(duration);
+        saveMessage.text="";
     }
     bool inBounds(){
         return Input.mousePosition.x>180 && Input.mousePosition.x<1000 && Input.mousePosition.y>20 && Input.mousePosition.y<520;
@@ -124,8 +131,16 @@ public class CornerSnapper : MonoBehaviour
     }
     public void savePattern()
     {
-        if(listOfCoords.Count<=1){return;}
+        
     string saveDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+    if(listOfCoords.Count<1){
+        StartCoroutine(showMessage("NÃO HÁ MANDALAS SUFICIENTES!",3f,Color.red));
+        return;
+        }
+    if(!isIdValid(idField.text,saveDirectory)){
+        StartCoroutine(showMessage("ID JÁ NA BASE DE DADOS!",3f,Color.red));
+        return;
+    }
     string saveFilePath = Path.Combine(saveDirectory, nameField.text+".csv");
     if(!Directory.Exists(saveDirectory))
     {
@@ -139,6 +154,21 @@ public class CornerSnapper : MonoBehaviour
     File.WriteAllText(saveFilePath,lines);
     CloseSaveWindow();
     clearAll();
+    if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
+   }
+   bool isIdValid(string id,string path){
+       DirectoryInfo dInfo = new DirectoryInfo(path);//Assuming Test is your Folder
+        FileInfo[] fileArray = dInfo.GetFiles(); //Ge
+        foreach (FileInfo item in fileArray)
+        {
+            string[] file = File.ReadAllLines(Path.Combine(path,item.Name));
+            if(id==file[file.Length-1]){
+                return false;
+            }
+        }
+        return true;
    }
    void clearAll(){
        btnList= new List<Transform>();

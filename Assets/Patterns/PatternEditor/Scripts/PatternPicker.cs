@@ -56,6 +56,9 @@ public class PatternPicker : MonoBehaviour
             addSequenceScreen.SetActive(false);
             UpdateSelectedSequence();
         }
+        if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
     }
 
     // Update is called once per frame
@@ -139,5 +142,8 @@ public class PatternPicker : MonoBehaviour
             newLines[i]=lines[i];
         }
         File.WriteAllLines(saveFilePath, newLines);
+        if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
     }
 }

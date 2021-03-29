@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CastleHealth : MonoBehaviour
 {
-    [SerializeField]float MaxHealth = 100f;
+    [SerializeField]int MaxHealth = 100;
     [SerializeField]Image healthBarImage;
     [SerializeField]float smoothness=5f;
     [SerializeField]Pattern pattern;
@@ -15,7 +15,7 @@ public class CastleHealth : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {   
-        MaxHealth =PlayerPrefs.HasKey("CastleHealth")?PlayerPrefs.GetFloat("CastleHealth"):300f;
+        MaxHealth =Mathf.RoundToInt(PlayerPrefs.GetFloat("CastleHealth"));
         PlayerPrefs.SetFloat("CastleHealth",MaxHealth);
         currentHealth = MaxHealth;
         healthBarImage.fillAmount = 1;
@@ -26,9 +26,6 @@ public class CastleHealth : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.A)){
-            TakeDamage(5f);
-        }
         updateHealthBar();
     }
     public void TakeDamage(float damage){
@@ -49,8 +46,6 @@ public class CastleHealth : MonoBehaviour
     void GameOverSequence(){
         musicAs.Stop();
         gameOverScreen.SetActive(true);
-        if(PlayerPrefs.GetString("GerarRelatório")=="sim"){
         FindObjectOfType<Pattern>().GerarRelatório();
-        }
     }
 }
