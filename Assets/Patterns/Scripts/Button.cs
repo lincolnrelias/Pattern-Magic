@@ -18,7 +18,7 @@ public class Button : MonoBehaviour{
     AudioClip pointSound;
     Image img;
     Rigidbody2D rb;
-    int x,y,s;
+    int x,y,h,w;
 
     void Start(){
         webcamInstance = FindObjectOfType<Webcam>();
@@ -27,6 +27,7 @@ public class Button : MonoBehaviour{
          audioSource = GetComponent<AudioSource>();
         rb=gameObject.AddComponent<Rigidbody2D>();
          rb.bodyType=RigidbodyType2D.Static;
+         rt.localScale=new Vector3(1.3f,1.3f,1f);
          //Tenta pegar o componente do pai
          patternExample pattern  = transform.parent.GetComponent<patternExample>();
          //Se não der certo pega do primeiro filho do pai
@@ -55,11 +56,11 @@ public class Button : MonoBehaviour{
         // int x = (int) (100*webcamInstance.scale),
         //     y = (int) (190*webcamInstance.scale),
         //     s = (int) (100*webcamInstance.scale);
-             x = (int) (Mathf.Abs(rt.anchoredPosition.x)*webcamInstance.scale);
-            y = (int) ((Mathf.Abs(rt.anchoredPosition.y-offsetY))*webcamInstance.scale);
-            s = (int) (rt.rect.height*webcamInstance.scale);
-        
-        if(webcamInstance.checkArea( x, y, s, s ) ){
+             x = (int) (Mathf.Abs(rt.anchoredPosition.x)*webcamInstance.scaleHorizontal);
+            y = (int) ((Mathf.Abs(rt.anchoredPosition.y-offsetY))*webcamInstance.scaleHorizontal);
+            w = (int) (rt.rect.width*webcamInstance.scaleHorizontal);
+            h= (int) (rt.rect.width*webcamInstance.scaleVertical);
+        if(webcamInstance.checkArea( x, y, w, w ) ){
             if(canCheck && img.color!=checkedColor){
             img.color = checkedColor;
             GetComponent<Animator>().SetTrigger("Check");

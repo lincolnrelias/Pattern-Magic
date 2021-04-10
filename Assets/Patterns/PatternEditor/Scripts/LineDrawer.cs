@@ -25,8 +25,8 @@ public class LineDrawer : MonoBehaviour
         if (btn1.gameObject.activeSelf && btn2.gameObject.activeSelf)
         {
             rectTransform.localPosition = (btn1.localPosition + btn2.localPosition) / 2;
-            Vector3 dif = btn2.localPosition - btn1.localPosition;
-            rectTransform.sizeDelta = new Vector3(dif.magnitude*(2-rectTransform.localScale.x), _lineThickness);
+            Vector3 dif =  btn2.localPosition - btn1.localPosition;
+            rectTransform.sizeDelta = new Vector3(dif.magnitude*(2-rectTransform.localScale.x)+btn1.rect.width, _lineThickness);
             rectTransform.rotation = Quaternion.Euler(new Vector3(0, 0, 180 * Mathf.Atan(dif.y / dif.x) / Mathf.PI));
         }
    }

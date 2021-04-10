@@ -150,7 +150,8 @@ public class CornerSnapper : MonoBehaviour
     for(int i=0;i<listOfCoords.Count;i++){
         lines+= listOfCoords[i][0].ToString()+","+listOfCoords[i][1].ToString()+"\n";
     }
-    lines+= idField.text;
+     lines+=PlayerPrefs.GetInt("currentId").ToString();
+    PlayerPrefs.SetInt("currentId",PlayerPrefs.GetInt("currentId")+1);
     File.WriteAllText(saveFilePath,lines);
     CloseSaveWindow();
     clearAll();

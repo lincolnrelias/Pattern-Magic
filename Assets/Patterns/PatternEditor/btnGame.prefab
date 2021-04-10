@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 746870083460019012}
   - component: {fileID: 746870083460019013}
   m_Layer: 5
-  m_Name: Button
+  m_Name: btnGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 733a9067e4b426c4a8d81ae70638817d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offsetY: 100
+  offsetY: 0
   canCheck: 0
 --- !u!82 &746870083460019012
 AudioSource:

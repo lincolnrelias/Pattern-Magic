@@ -30,7 +30,6 @@ public class PauseMenu : MonoBehaviour
         FindObjectOfType<Pattern>().GerarRelatório();
         }
         webcam1.stop();
-        SceneManager.UnloadSceneAsync("Main");
         SceneManager.LoadScene("Menu");
         
     }

@@ -34,7 +34,7 @@ public class PatternPicker : MonoBehaviour
 
     }
     public void openAddSequenceScreen(){
-        addSequenceScreen.SetActive(true);
+        addSequenceScreen.SetActive(!addSequenceScreen.activeSelf);
     }
     public void saveNewSequence(){
             string saveDirectory = Path.Combine(Application.persistentDataPath, "sets");
@@ -67,35 +67,43 @@ public class PatternPicker : MonoBehaviour
         selectedSequence.RefreshShownValue();
         availablePatterns.RefreshShownValue();
         selectedPatterns.RefreshShownValue();
-        
+        if(selectedSequence.options[selectedSequence.value].text!=""){
+            PlayerPrefs.SetString("currentSequence",selectedSequence.options[selectedSequence.value].text);
+        }
     }
     void UpdateSelectedSequence(){
             selectedSequence.ClearOptions();
             string saveDirectory = Path.Combine(Application.persistentDataPath, "sets");
             DirectoryInfo dInfo = new DirectoryInfo(saveDirectory);//Assuming Test is your Folder
             FileInfo[] fileArray = dInfo.GetFiles(); //Ge
+            if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
             foreach (FileInfo item in fileArray)
         {
             selectedSequence.options.Add(new TMP_Dropdown.OptionData(item.Name.Replace(".csv","")));
         }
         
     }
-    public void setSelectedSequenceValue(){
-        PlayerPrefs.SetString("currentSequence",selectedSequence.options[selectedSequence.value].text);
-    }
     IEnumerator UpdateSelectedPatterns(){
         while(true){
+        if(selectedSequence.options[selectedSequence.value].text!=""){
           string saveDirectory = Path.Combine(Application.persistentDataPath, "sets");
         if(Directory.Exists(saveDirectory)){
-        string saveFilePath = Path.Combine(saveDirectory, PlayerPrefs.GetString("currentSequence")+".csv");
+        string saveFilePath = Path.Combine(saveDirectory, selectedSequence.options[selectedSequence.value].text+".csv");
         string[] fileArray = File.ReadAllLines(saveFilePath);
         selectedPatterns.ClearOptions();
+        if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
         foreach (string item in fileArray)
         {
             selectedPatterns.options.Add(new TMP_Dropdown.OptionData(item));
         }
 
+        }   
         }
+         
         yield return new WaitForSeconds(.2f);  
         }
         
@@ -119,14 +127,18 @@ public class PatternPicker : MonoBehaviour
         {
         Directory.CreateDirectory(saveDirectory);
         }
-        File.AppendAllText(Path.Combine(saveDirectory, PlayerPrefs.GetString("currentSequence")+".csv"),availablePatterns.options[availablePatterns.value].text+"\n");
+        File.AppendAllText(Path.Combine(saveDirectory, selectedSequence.options[selectedSequence.value].text+".csv"),availablePatterns.options[availablePatterns.value].text+"\n");
+        if(Application.platform == RuntimePlatform.WebGLPlayer){
+        Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
+    }
     }
     public void remove(){
         if(selectedSequence.options[selectedSequence.value].text==""){
             StartCoroutine(showErrorMessage("NENHUMA SEQUÊNCIA SELECIONADA!",3f));
             return;
         }
-        if(selectedPatterns.options[selectedPatterns.value].text==""){
+        if(selectedPatterns.options.Count==0){
+            print("bobva");
             StartCoroutine(showErrorMessage("NENHUM PADRÃO PARA APAGAR!",3f));
             return;
         }
@@ -135,7 +147,7 @@ public class PatternPicker : MonoBehaviour
         {
         return;
         }
-        string saveFilePath =Path.Combine(saveDirectory, PlayerPrefs.GetString("currentSequence")+".csv");
+        string saveFilePath =Path.Combine(saveDirectory, selectedSequence.options[selectedSequence.value].text+".csv");
         string[] lines = File.ReadAllLines(saveFilePath);
         string[] newLines= new string[lines.Length-1];
         for(int i=0;i<newLines.Length;i++){

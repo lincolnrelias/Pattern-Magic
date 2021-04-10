@@ -57,7 +57,9 @@ public class Webcam : MonoBehaviour {
 	
 
 	[HideInInspector]
-	public float scale = 1f;
+	public float scaleHorizontal = 1f;
+	[HideInInspector]
+	public float scaleVertical = 1f;
 	// Escala da webcam com relação ao display
 	public Text test_webcamtexture, test_tx, test_ty, test_p;
 
@@ -110,7 +112,7 @@ public class Webcam : MonoBehaviour {
 	IEnumerator StartWebcam(){
         WebCamDevice[] devices = WebCamTexture.devices;
         //test_webcamtexture.text = ("cameras " + devices.Length);
-        webcamTexture = new WebCamTexture(devices[0].name,640,480,15);
+        webcamTexture = new WebCamTexture(devices[0].name,Screen.currentResolution.width/2,Screen.currentResolution.height/2,20);
         //webcamTexture = new WebCamTexture();
         webcamTexture.Play();
 
@@ -141,7 +143,8 @@ public class Webcam : MonoBehaviour {
 
         if ( Display ){
 			Display.texture = blendTexture;
-			scale = webcamTexture.width / Display.rectTransform.rect.width;
+			scaleHorizontal = webcamTexture.width / Display.rectTransform.rect.width;
+			scaleVertical = webcamTexture.height/Display.rectTransform.rect.height;
 		}
 
         if (Display2)

@@ -40,16 +40,24 @@ public class Menu : MonoBehaviour
             if(!PlayerPrefs.HasKey("Volume")){
                 PlayerPrefs.SetFloat("Volume",.7f);
             }
+            if(!PlayerPrefs.HasKey("currentId")){
+                PlayerPrefs.SetInt("currentId",14);
+            }
         
     }
     void checkDificulties(){
         string saveDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+        if (!(Directory.Exists(saveDirectory)))
+            Directory.CreateDirectory(saveDirectory);
+
         string setDirectory = Path.Combine(Application.persistentDataPath, "sets");
+        if (!(Directory.Exists(setDirectory)))
+            Directory.CreateDirectory(setDirectory);
         string readEasyFilePath =Path.Combine(setDirectory, "fácil.csv");
         string readMediumFilePath =Path.Combine(setDirectory, "médio.csv");
         if(!File.Exists(readEasyFilePath)){
             WriteEasyFiles(saveDirectory);
-            string lines = "facil1\nfacil2\nfacil3\nfacil4\nfacil5\nfacil6\nfacil7\nfacil8";
+            string lines = "facil1\nfacil2\nfacil3\nfacil4\nfacil5\nfacil6\nfacil7";
             File.WriteAllText(readEasyFilePath,lines);
             Application.ExternalCall("FS.syncfs(false, function(err) {console.log('Error: syncfs failed!');});"); 
         }

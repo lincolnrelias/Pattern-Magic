@@ -27,6 +27,8 @@ public class Pattern : MonoBehaviour
 	GameObject completionScreen;
     [SerializeField]
     Webcam webcam;
+    [SerializeField]
+    Score score;
     List<KeyTime> parAcertosEErros=new List<KeyTime>();
     // Start is called before the first frame update
     [SerializeField]
@@ -73,7 +75,9 @@ public class Pattern : MonoBehaviour
         if(currChildColor == checkedColor){
             currentNode=currentNode=Mathf.Clamp(currentNode+1,1,transform.childCount);
             lastWasError=false;
-            parAcertosEErros.Add(new KeyTime("Acerto",currentNode-1,Time.time-lastHitTime,distanceToEnemy()));
+            float hitTime = Time.time-lastHitTime;
+            parAcertosEErros.Add(new KeyTime("Acerto",currentNode-1,hitTime,distanceToEnemy()));
+            score.addScore(hitTime);
             lastHitTime = Time.time;
         }     
         
@@ -181,8 +185,14 @@ public class Pattern : MonoBehaviour
     {
         Transform child;
         int spawnIndex = lastWasError?currPatternIndex-1:currPatternIndex;
-        string patternPath = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic/"+patternList[spawnIndex]+".csv");
+        string saveDir = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+        if(!Directory.Exists(saveDir))
+    {
+    Directory.CreateDirectory(saveDir);
+    }
+        string patternPath = Path.Combine(saveDir,patternList[spawnIndex]+".csv");
             string[] patternInfo = File.ReadAllLines(patternPath);
+            
             Array.Resize(ref patternInfo,patternInfo.Length-1);
             List<int[]> patternInfoList = new List<int[]>();
             foreach (string item in patternInfo)
@@ -246,7 +256,7 @@ public class Pattern : MonoBehaviour
             Transform child = transform.GetChild(exampleIndex);
             child.GetComponent<Image>().color=pattern.getColors()[0];
             exampleIndex++;
-            yield return new WaitForSecondsRealtime(interval);
+            yield return new WaitForSeconds(interval);
             audioSource.PlayOneShot(pointSound);
         }
         transform.GetChild(exampleIndex-1).GetComponent<Image>().color=pattern.getColors()[1];

@@ -27,13 +27,14 @@ public class GeradorRelatório : MonoBehaviour
             int tipo = TableContents[i].tipo=="Acerto"?1:0;
             tablescsv+=("\n");
             tablescsv+=(PlayerPrefs.GetString("PlayerName")+";");
+            tablescsv+=patternName+";";
             tablescsv+=(convertedName+";");
             tablescsv+=(System.DateTime.Now.ToString("dd'/'MM'/'yyyy' 'HH':'mm':'ss")+";");
 			tablescsv+=(tipo+";");
 			tablescsv+=(TableContents[i].value+";");
 			tablescsv+=(TableContents[i].time.ToString("F2") +";");
             tablescsv+=(Mathf.Round(TableContents[i].distance)+";");
-            tablescsv+=(Mathf.RoundToInt(PlayerPrefs.GetInt("CastleHealth")).ToString()+";");
+            tablescsv+=(ch.getMaxHealth()+";");
             tablescsv+=((ch.getCurrHealth()));
 		}
 		
@@ -55,27 +56,35 @@ public class GeradorRelatório : MonoBehaviour
 	}
     string convertName(string pName){
         string saveDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+        if(!Directory.Exists(saveDirectory))
+    {
+    Directory.CreateDirectory(saveDirectory);
+    }
         string readFilePath =Path.Combine(saveDirectory, pName+".csv");
+        if(!File.Exists(readFilePath)){
+            return "undefined";
+        }
         string[] lines = File.ReadAllLines(readFilePath);
         return lines[lines.Length-1];
     }
     public void saveCSV(){
     string saveDirectory = Path.Combine(Application.persistentDataPath, "DadosPatternMagic");
-    string patternDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
-    string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");
-    string PatternTablePath =  Path.Combine(saveDirectory, "tableData.csv");
-    string RawDataPath =  Path.Combine(saveDirectory, "rawData.csv");
     if(!Directory.Exists(saveDirectory))
     {
     Directory.CreateDirectory(saveDirectory);
     }
-         
+    string patternDirectory = Path.Combine(Application.persistentDataPath, "PadroesPatternMagic");
+    string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");
+    string PatternTablePath =  Path.Combine(saveDirectory, "tableData.csv");
+    string RawDataPath =  Path.Combine(saveDirectory, "rawData.csv");
+      
         string collumns=("Paciente;");
+        collumns+=("Nome do padrao;");
         collumns+=("ID do padrao;");
         collumns+=("Data/Hora;");
 		collumns+=("Erro/Acerto;");
 		collumns+=("Mandala atingida;");
-        collumns+=("Tempo desde o ultimo erro/acerto;");
+        collumns+=("Tempo desde o ultimo erro/acerto(s);");
         collumns+=("Distância entre inimigo-castelo;");
         collumns+=("Vida inicial do castelo;");
         collumns+=("Vida atual do castelo;");
@@ -105,8 +114,11 @@ public class GeradorRelatório : MonoBehaviour
     
     }
     public static void downloadReport(){
-    if(Application.platform == RuntimePlatform.WebGLPlayer){
         string saveDirectory = Path.Combine(Application.persistentDataPath, "DadosPatternMagic");
+        if(!Directory.Exists(saveDirectory)){
+            return;
+        }
+    if(Application.platform == RuntimePlatform.WebGLPlayer){
         string endFilePath = Path.Combine(saveDirectory, "dadosCompilados.csv");  
         string result = File.ReadAllText(endFilePath);
         WebGLFileSaver.SaveFile(result, "Relatorio.csv");   
