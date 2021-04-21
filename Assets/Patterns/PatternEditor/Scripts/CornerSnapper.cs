@@ -57,10 +57,14 @@ public class CornerSnapper : MonoBehaviour
     StartCoroutine(updatePos());
     DrawLines();
     UpdateButtonLabels();
+    LineDrawer.updateLinesScales(lineDrawer.transform);
     }
     void UpdateButtonLabels(){
+         currentButton.transform.localScale = new Vector3(.6f,.6f,1);
         for(int i=0;i<btnList.Count;i++){
             btnList[i].GetChild(0).GetComponent<TMP_Text>().text=i.ToString();
+            btnList[i].transform.localScale= new Vector3(.6f,.6f,1);
+           
         }
     }
     void DrawLines(){
@@ -69,9 +73,9 @@ public class CornerSnapper : MonoBehaviour
         
         for (int i=1; i<btnList.Count;i++)
         {
-            LineDrawer.drawLine(btnList[i].gameObject,btnList[i-1].gameObject,lineImage,lineDrawer,lineThickness);
+            LineDrawer.drawLine(btnList[i].gameObject,btnList[i-1].gameObject,lineImage,lineDrawer,lineThickness,Screen.height<1080 && Screen.width<1920);
         }
-        LineDrawer.drawLine(btnList[btnList.Count-1].gameObject,btnList[0].gameObject,lineImage,lineDrawer,lineThickness);
+        LineDrawer.drawLine(btnList[btnList.Count-1].gameObject,btnList[0].gameObject,lineImage,lineDrawer,lineThickness,Screen.height<1080 && Screen.width<1920);
     }
     IEnumerator updatePos(){
         yield return new WaitForSeconds(.1f);
@@ -85,7 +89,7 @@ public class CornerSnapper : MonoBehaviour
         
     }
     lastSmallestDistance=1000f;
-    currentButton.transform.parent = lastClosestNode;
+    currentButton.transform.SetParent(lastClosestNode);
     currentButton.GetComponent<RectTransform>().anchoredPosition= Vector3.zero;
     SnappPoint snappPoint = lastClosestNode.GetComponent<SnappPoint>();
     currentButton.transform.SetParent(btnParent);
@@ -107,7 +111,12 @@ public class CornerSnapper : MonoBehaviour
         saveMessage.text="";
     }
     bool inBounds(){
-        return Input.mousePosition.x>180 && Input.mousePosition.x<1000 && Input.mousePosition.y>20 && Input.mousePosition.y<520;
+        float x = Input.mousePosition.x;
+        float y = Input.mousePosition.y;
+        float ScreenX = Screen.width;
+        float ScreenY = Screen.height;
+        print(ScreenX+" "+ScreenY);
+        return ScreenX*0.18<x && x<ScreenX-ScreenX*0.05 && y<ScreenY-ScreenY*0.08 && y>0;
     }
     public void OpenSaveWindow(){
         saveScreen.SetActive(true);

@@ -16,6 +16,8 @@ public class MeteorSpell : MonoBehaviour
     void Start()
     {
        target = FindObjectOfType<Enemy>();
+       target.canAttack=false;
+       target.canMove=false;
     }
 
     // Update is called once per frame

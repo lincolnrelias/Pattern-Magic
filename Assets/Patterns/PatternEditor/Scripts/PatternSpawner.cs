@@ -64,7 +64,7 @@ public class PatternSpawner : MonoBehaviour
    }
    void setBtnsAndDrawLine(int index1, int index2){
        LineDrawer.drawLine(patternExampleInst.transform.GetChild(index1).gameObject,
-        patternExampleInst.transform.GetChild(index2).gameObject,lineImage,lineDrawer,lineThickness);
+        patternExampleInst.transform.GetChild(index2).gameObject,lineImage,lineDrawer,lineThickness,false);
    }
    
 }

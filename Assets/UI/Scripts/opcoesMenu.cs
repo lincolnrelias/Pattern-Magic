@@ -23,9 +23,12 @@ public class opcoesMenu : MonoBehaviour
     GameObject btnCustomChecked;
     [SerializeField]
     TMP_Text currentSequenceText;
+    [SerializeField]
+    Toggle nMandalasToggle;
     Menu menu;
     private void Start() {
         menu = FindObjectOfType<Menu>();
+        nMandalasToggle.isOn = PlayerPrefs.GetInt("MostrarNumeroMandalas")==1?true:false;
         castleHealthSlider.value=PlayerPrefs.GetFloat("CastleHealth");
         volumeSlider.value=PlayerPrefs.GetFloat("Volume");
         musicVolSlider.value=PlayerPrefs.GetFloat("volMusica");
@@ -67,14 +70,22 @@ public class opcoesMenu : MonoBehaviour
         PlayerPrefs.SetInt("ModoPunicao",2);
         menu.playClickSound();
     }
+    public void changeMostrarNMandalas(){
+        PlayerPrefs.SetInt("MostrarNumeroMandalas",nMandalasToggle.isOn?1:0);
+        if(menu){
+            menu.playClickSound();
+        }
+    }
     public void GerarRelatorio(){
         PlayerPrefs.SetString("GerarRelatorio","sim");
+        menu.playClickSound();
     }
     public void NGerarRelatorio(){
         PlayerPrefs.SetString("GerarRelatorio","nao");
+        menu.playClickSound();
     }
      private void LateUpdate() {
-         castleHealthDisplay.SetText(Mathf.RoundToInt(castleHealthSlider.value).ToString());
+         castleHealthDisplay.SetText(Mathf.RoundToInt(castleHealthSlider.value).ToString()+"s");
          currentSequenceText.text = "Sequência personalizada escolhida:\n"+PlayerPrefs.GetString("currentSequence");
         if(PlayerPrefs.GetString("Dificuldade")=="fácil"){
             btnFacilChecked.SetActive(true);

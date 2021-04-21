@@ -2558,8 +2558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hittingPoint: {fileID: 0}
   speed: 8
-  damage: 10
-  explosionSound: {fileID: 8300000, guid: 1107b9d3970bf1942b7b8c942cd745e3, type: 3}
+  damage: 1
   footstepSounds:
   - {fileID: 8300000, guid: 85f7038c44e2a4445bc5b212a2e8ce45, type: 3}
   - {fileID: 8300000, guid: 0ac1a8f59fb3fb84aa45e2e5f93fd946, type: 3}

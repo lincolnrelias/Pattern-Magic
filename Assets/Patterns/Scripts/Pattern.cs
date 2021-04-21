@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System;
+
 public class Pattern : MonoBehaviour
 {   
     AudioClip completionSound,pointSound,errorSound;
@@ -23,6 +25,8 @@ public class Pattern : MonoBehaviour
     float intervalBetweenPatterns= 1.5f;
     [SerializeField]
     GameObject spell;
+    [SerializeField]
+    GameObject mageObj;
     [SerializeField]
 	GameObject completionScreen;
     [SerializeField]
@@ -60,6 +64,7 @@ public class Pattern : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        LineDrawer.updateLinesScales(patternSpawner.getLineDrawer().transform);
         if(playing || done || reseting){
             lastHitTime = Time.time;
             return;
@@ -95,29 +100,14 @@ public class Pattern : MonoBehaviour
     public bool inHitInterval(){
         return Time.time-lastHitTime<minHitInterval;
     }
-    public void errorAdd(int btnIndex,int returnType){
-        if(InErrorInterval() || playing || currentNode<2){return;};
+    public void errorAdd(int btnIndex){
+        if(InErrorInterval() || playing || currentNode<1){return;};
         lastErrorTime = Time.time;
         parAcertosEErros.Add(new KeyTime("Erro",btnIndex,Time.time-lastErrorTime,distanceToEnemy()));
         lastWasError=true;
         Button btnNext;
         Button btnCurr;
-        if(returnType==1){
-                currentNode=Mathf.Clamp(currentNode-1,1,transform.childCount);
-                btnCurr = transform.GetChild(currentNode).GetComponent<Button>();
-                btnCurr.GetComponent<Animator>().SetTrigger("Error");
-                btnCurr.switchColor();
-                btnCurr.canCheck=false;
-                int nodeC = currentNode;
-                while(nodeC>1){
-                nodeC=Mathf.Clamp(nodeC-1,1,transform.childCount);
-               btnCurr = transform.GetChild(nodeC).GetComponent<Button>();
-               btnCurr.canCheck=false;
-               
-            }
-             btnNext=transform.GetChild(currentNode).GetComponent<Button>();
-            btnNext.canCheck=true;
-        }else{
+        
             int nodeC = transform.childCount-1;
             while(nodeC>0){
                 btnCurr = transform.GetChild(nodeC).GetComponent<Button>();
@@ -125,7 +115,6 @@ public class Pattern : MonoBehaviour
                 nodeC--;
             }
                 PatternCompletion();
-        }
         
         if(!audioSource.isPlaying){
             audioSource.PlayOneShot(errorSound);
@@ -147,6 +136,7 @@ public class Pattern : MonoBehaviour
             Vector3 spellPos = enemy.transform.position;
             spellPos.y+=30f;
             Instantiate(spell,spellPos,Quaternion.identity);
+            mageObj.GetComponent<Animator>().SetTrigger("cast");
         }  
         }
         
@@ -246,9 +236,29 @@ public class Pattern : MonoBehaviour
 
     return str;
 }
+    void showButtonNumbers(){
+        int index = exampleIndex;
+        while(index<transform.childCount){
+            Transform child = transform.GetChild(index);
+            child.GetChild(0).GetComponent<TMP_Text>().text=index.ToString();
+            index++;
+        }
+    }
+    void hideButtonNumbers(){
+        int index = transform.childCount-1;
+        while(index>0){
+            Transform child = transform.GetChild(index);
+            child.GetChild(0).GetComponent<TMP_Text>().text="";
+            index--;
+        }
+    }
     IEnumerator iterateTroughPoints(){
         playing=true;
         patternExample pattern = transform.GetChild(0).GetComponent<patternExample>();
+        if(PlayerPrefs.GetInt("MostrarNumeroMandalas")==1){
+                showButtonNumbers();
+            }
+        if(lastWasError){Time.timeScale=0;}
         while(exampleIndex<transform.childCount){
             if(exampleIndex>1){
                 transform.GetChild(exampleIndex-1).GetComponent<Image>().color=pattern.getColors()[1];
@@ -256,13 +266,20 @@ public class Pattern : MonoBehaviour
             Transform child = transform.GetChild(exampleIndex);
             child.GetComponent<Image>().color=pattern.getColors()[0];
             exampleIndex++;
-            yield return new WaitForSeconds(interval);
+            yield return new WaitForSecondsRealtime(interval);
             audioSource.PlayOneShot(pointSound);
         }
         transform.GetChild(exampleIndex-1).GetComponent<Image>().color=pattern.getColors()[1];
+        yield return new WaitForSecondsRealtime(interval);
         if(!lastWasError){
           enemySpawner.SpawnEnemy();  
+        }else{
+            Time.timeScale=1;
         }
+        if(PlayerPrefs.GetInt("MostrarNumeroMandalas")==1){
+                hideButtonNumbers();
+            }
+        
         playing=false;
     }
 }

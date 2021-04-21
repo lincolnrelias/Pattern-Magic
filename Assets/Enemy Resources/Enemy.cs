@@ -18,6 +18,9 @@ public class Enemy : MonoBehaviour
     Animator enemyAnimator;
     bool dead = false;
     AudioSource enemyAudioSrc;
+    float lastHittime=0;
+    public bool canAttack=true;
+    public bool canMove=true;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,9 +35,17 @@ public class Enemy : MonoBehaviour
     {
         if(dead)return;
         transform.LookAt(hittingPoint.position);
-        transform.position = Vector3.MoveTowards(transform.position, hittingPoint.position, speed * Time.deltaTime);
-        if(transform.position==hittingPoint.position){
-        enemyAnimator.SetTrigger("isAttacking");
+        
+        if(canAttack && transform.position==hittingPoint.position){
+        enemyAnimator.SetBool("Running",false);
+        enemyAnimator.SetBool("isAttacking",true);
+        }else{
+            enemyAnimator.SetBool("isAttacking",false);
+        }
+        if(!canMove){
+            enemyAnimator.SetBool("Running",false);
+        }else{
+            transform.position = Vector3.MoveTowards(transform.position, hittingPoint.position, speed * Time.deltaTime);
         }
     }
     public void Die(){
@@ -52,6 +63,7 @@ public class Enemy : MonoBehaviour
     enemyAudioSrc.clip=attackSounds[0];
     enemyAudioSrc.volume = 0.3f;
     enemyAudioSrc.Play();
+    lastHittime=Time.time;
     }
     void FootR(){
        enemyAudioSrc.clip = footstepSounds[0];

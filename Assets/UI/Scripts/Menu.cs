@@ -26,23 +26,26 @@ public class Menu : MonoBehaviour
             PlayerPrefs.SetString("PlayerName","Jogador");
         }
         if(!PlayerPrefs.HasKey("CastleHealth")){
-            PlayerPrefs.SetFloat("CastleHealth",300);}
+            PlayerPrefs.SetFloat("CastleHealth",40);}
         if(!PlayerPrefs.HasKey("Dificuldade")){
             PlayerPrefs.SetString("Dificuldade","fácil");}  
         if(!PlayerPrefs.HasKey("volMusica")){
             PlayerPrefs.SetFloat("volMusica",.8f);}  
-            if(!PlayerPrefs.HasKey("currentSequence")){
-                PlayerPrefs.SetString("currentSequence","fácil");
-            }
-            if(!PlayerPrefs.HasKey("Dificuldade")){
-                PlayerPrefs.SetString("Dificuldade","fácil");
-            }    
-            if(!PlayerPrefs.HasKey("Volume")){
-                PlayerPrefs.SetFloat("Volume",.7f);
-            }
-            if(!PlayerPrefs.HasKey("currentId")){
-                PlayerPrefs.SetInt("currentId",14);
-            }
+        if(!PlayerPrefs.HasKey("currentSequence")){
+            PlayerPrefs.SetString("currentSequence","fácil");
+        }
+        if(!PlayerPrefs.HasKey("Dificuldade")){
+            PlayerPrefs.SetString("Dificuldade","fácil");
+        }    
+        if(!PlayerPrefs.HasKey("Volume")){
+            PlayerPrefs.SetFloat("Volume",.7f);
+        }
+        if(!PlayerPrefs.HasKey("currentId")){
+            PlayerPrefs.SetInt("currentId",14);
+        }
+        if(!PlayerPrefs.HasKey("MostrarNumeroMandalas")){
+            PlayerPrefs.SetInt("MostrarNumeroMandalas",0);
+        }
         
     }
     void checkDificulties(){
@@ -92,7 +95,7 @@ public class Menu : MonoBehaviour
         File.WriteAllText(path+"/medio1.csv",lines);
         lines = "1,4\n1,10\n6,11\n8,7\n6,3\n9";
         File.WriteAllText(path+"/medio2.csv",lines);
-        lines = "1,2\n4,2\n2,5\n6,5\n\n4,7\n8,7\n6,9\n10";
+        lines = "1,2\n4,2\n2,5\n6,5\n4,7\n8,7\n6,9\n10";
         File.WriteAllText(path+"/medio3.csv",lines);
         lines = "3,1\n6,2\n7,6\n5,9\n3,10\n0,7\n5,6\n11";
         File.WriteAllText(path+"/medio4.csv",lines);
@@ -111,7 +114,8 @@ public class Menu : MonoBehaviour
         
     }
     public void playClickSound(){
-        audioSource.PlayOneShot(btnClickSound);
+        audioSource.clip = btnClickSound;
+        audioSource.Play();
     }
    public void IniciarJogo(){
         SceneManager.LoadScene("Main",LoadSceneMode.Single);

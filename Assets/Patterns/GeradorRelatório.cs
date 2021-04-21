@@ -86,8 +86,8 @@ public class GeradorRelatório : MonoBehaviour
 		collumns+=("Mandala atingida;");
         collumns+=("Tempo desde o ultimo erro/acerto(s);");
         collumns+=("Distância entre inimigo-castelo;");
-        collumns+=("Vida inicial do castelo;");
-        collumns+=("Vida atual do castelo;");
+        collumns+=("Vida inicial do castelo(s);");
+        collumns+=("Vida restante do castelo(s);");
     File.AppendAllText(RawDataPath, relatorioFinal);
     string newTableData="";
     DirectoryInfo dInfo = new DirectoryInfo(patternDirectory);//Assuming Test is your Folder

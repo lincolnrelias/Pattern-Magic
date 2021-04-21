@@ -56,12 +56,15 @@ public class Button : MonoBehaviour{
         // int x = (int) (100*webcamInstance.scale),
         //     y = (int) (190*webcamInstance.scale),
         //     s = (int) (100*webcamInstance.scale);
+        if(img.color==checkedColor){
+            return;
+        }
              x = (int) (Mathf.Abs(rt.anchoredPosition.x)*webcamInstance.scaleHorizontal);
             y = (int) ((Mathf.Abs(rt.anchoredPosition.y-offsetY))*webcamInstance.scaleHorizontal);
             w = (int) (rt.rect.width*webcamInstance.scaleHorizontal);
             h= (int) (rt.rect.width*webcamInstance.scaleVertical);
         if(webcamInstance.checkArea( x, y, w, w ) ){
-            if(canCheck && img.color!=checkedColor){
+            if(canCheck){
             img.color = checkedColor;
             GetComponent<Animator>().SetTrigger("Check");
             GameObject effectTemp = Instantiate(checkedEffect,transform.position+effectOffset,Quaternion.identity);
@@ -71,9 +74,8 @@ public class Button : MonoBehaviour{
             if(!audioSource.isPlaying){
                audioSource.PlayOneShot(pointSound); 
                 }
-            }else if(img.color==uncheckedColor){
-                int modoPun = PlayerPrefs.HasKey("ModoPunicao")?PlayerPrefs.GetInt("ModoPunicao"):2;
-                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex()+1,modoPun);
+            }else{
+                FindObjectOfType<Pattern>().errorAdd(transform.GetSiblingIndex()+1);
             }
         }
     }
